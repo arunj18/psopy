@@ -47,11 +47,12 @@ References
 
 
 from .constraints import gen_confunc, init_feasible
-from .minimize import minimize, _minimize_pso
+from .minimize import minimize, _minimize_pso, minimize_qpso
 
 __all__ = [
     'gen_confunc',
     'init_feasible',
     'minimize',
-    '_minimize_pso'
+    '_minimize_pso',
+    'minimize_qpso'
 ]
