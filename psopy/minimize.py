@@ -213,12 +213,44 @@ def _minimize_pso(
     return result
 
 def _minimize_qpso(
-        fun, x0, confunc=None, friction=.8, max_velocity=5., g=.96, 
+        fun, x0, confunc=None, g=.96, 
         max_iter=1000, stable_iter=100, ptol=1e-6, ctol=1e-6,
         callback=None, verbose=False, savefile=None):
+        """Internal implementation for ``psopy.minimize_qpso``.
+
+    See Also
+    --------
+    psopy.minimize_qpso : The SciPy compatible interface to this function. Refer to
+        its documentation for an explanation of the parameters.
+    psopy.gen_confunc : Utility function to convert SciPy style constraints
+        to the form required by this function.
+
+    Parameters
+    ----------
+    x0 : array_like of shape (N, D)
+        Initial position to begin QPSO from, where ``N`` is the number of points
+        and ``D`` the dimensionality of each point. For the constrained case
+        these points should satisfy all constraints.
+    fun : callable
+        The objective function to be minimized. Must be in the form
+        ``fun(pos, *args)``. The argument ``pos``, is a 2-D array for initial
+        positions, where each row specifies the position of a different
+        particle, and ``args`` is a tuple of any additional fixed parameters
+        needed to completely specify the function.
+    confunc : callable
+        The function that describes constraints. Must be of the form
+        ``confunc(pos)`` that returns the constraint matrix.
+
+    Notes
+    -----
+    Using this function directly allows for a slightly faster implementation
+    that does away with the need for the additional recursive calls needed to
+    wrap the constraint and objective functions for compatibility with Scipy.
+    """
+
     position = np.copy(x0)
-    #velocity = np.random.uniform(-max_velocity, max_velocity, position.shape)
     pbest = np.copy(position)
+    nparam = len(position)
     gbest = pbest[np.argmin(fun(pbest))]
     oldfit = fun(gbest[None])[0]
     stable_count = 0
@@ -236,13 +268,15 @@ def _minimize_qpso(
             dv_l = psi_2 * pbest
 
         P = (dv_g + dv_l) / (psi_1 + psi_2)
+        print(P)
 
-        u = uniform(0,1)
-        L = 1/g * np.abs( - P)
-        if uniform(0,1) > 0.5:
-            position = P - L*np.log(1/u)
-        else:
-            position = P + L*np.log(1/u)
+        u = uniform(0,1, nparam)
+        L = 1/g * np.abs(position - P)
+        for i in range(0, nparam):
+            if uniform(0,1) > 0.5:
+                position[i] = P[i] - L[i]*np.log(1/u[i])
+            else:
+                position[i] = P[i] + L[i]*np.log(1/u[i])
 
         # Update velocity and position of particles.
         #velocity *= friction
