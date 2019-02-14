@@ -26,6 +26,9 @@ from collections import namedtuple
 import functools as ft
 import numpy as np
 from numpy.random import uniform
+from random import normalvariate, randint, random
+
+from math import gamma, pi, sin
 from scipy.spatial import distance
 from scipy.optimize import OptimizeResult
 
@@ -215,8 +218,9 @@ def _minimize_pso(
 def _minimize_qpso(
         fun, x0, confunc=None, g=.96, 
         max_iter=1000, stable_iter=100, ptol=1e-6, ctol=1e-6,
+        levy=False,
         callback=None, verbose=False, savefile=None):
-        """Internal implementation for ``psopy.minimize_qpso``.
+    """Internal implementation for ``psopy.minimize_qpso``.
 
     See Also
     --------
@@ -247,19 +251,28 @@ def _minimize_qpso(
     that does away with the need for the additional recursive calls needed to
     wrap the constraint and objective functions for compatibility with Scipy.
     """
-
     position = np.copy(x0)
-    pbest = np.copy(position)
     nparam = len(position)
+    pbest = np.copy(position)
     gbest = pbest[np.argmin(fun(pbest))]
     oldfit = fun(gbest[None])[0]
     stable_count = 0
+    dimension = len(position[0])
+
+    
+    beta = 3 / 2
+    sigma = (gamma(1 + beta) * sin(pi * beta / 2) / (
+        gamma((1 + beta) / 2) * beta * 2 ** ((beta - 1) / 2))) ** (1 / beta)
+    u = np.array([normalvariate(0, 1) for k in range(dimension)]) * sigma
+    v = np.array([normalvariate(0, 1) for k in range(dimension)])
+    step = u / abs(v) ** (1 / beta)
 
     for ii in range(max_iter):
         # Determine global and local gradient.
         psi_1 = uniform(0,1)
         psi_2 = uniform(0,1)
         dv_g = psi_1 * gbest
+
         if confunc is not None:
             leaders = np.argmin(
                 distance.cdist(position, pbest, 'sqeuclidean'), axis=1)
@@ -272,11 +285,18 @@ def _minimize_qpso(
 
         u = uniform(0,1, nparam)
         L = 1/g * np.abs(position - P)
+
         for i in range(0, nparam):
-            if uniform(0,1) > 0.5:
-                position[i] = P[i] - L[i]*np.log(1/u[i])
+            
+            if levy and uniform(0,1) > 0.5:
+                stepsize = 0.2 * step * (position[i] - gbest)
+                position[i] += stepsize * np.array([normalvariate(0, 1)
+                                                for k in range(dimension)])
             else:
-                position[i] = P[i] + L[i]*np.log(1/u[i])
+                if uniform(0,1) > 0.5:
+                    position[i] = P[i] - L[i]*np.log(1/u[i])
+                else:
+                    position[i] = P[i] + L[i]*np.log(1/u[i])
 
         # Update velocity and position of particles.
         #velocity *= friction
