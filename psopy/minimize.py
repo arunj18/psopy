@@ -218,7 +218,7 @@ def _minimize_pso(
 def _minimize_qpso(
         fun, x0, confunc=None, g=.96, 
         max_iter=1000, stable_iter=100, ptol=1e-6, ctol=1e-6,
-        levy=False,
+        levy_rate=0.0,
         callback=None, verbose=False, savefile=None):
     """Internal implementation for ``psopy.minimize_qpso``.
 
@@ -284,26 +284,23 @@ def _minimize_qpso(
         print(P)
 
         u = uniform(0,1, nparam)
-        L = 1/g * np.abs(position - P)
 
-        for i in range(0, nparam):
-            
-            if levy and uniform(0,1) > 0.5:
-                stepsize = 0.2 * step * (position[i] - gbest)
-                position[i] += stepsize * np.array([normalvariate(0, 1)
+        if levy_rate > 0.0:
+            for i in range(0, nparam):
+                if uniform(0,1) < levy_rate:
+                    stepsize = 0.2 * step * (position[i] - gbest)
+                    position[i] += stepsize * np.array([normalvariate(0, 1)
                                                 for k in range(dimension)])
+        
+        L = 1/g * np.abs(position - P)
+        
+        for i in range(0, nparam):
+            if uniform(0,1) > 0.5:
+                position[i] = P[i] - L[i]*np.log(1/u[i])
             else:
-                if uniform(0,1) > 0.5:
-                    position[i] = P[i] - L[i]*np.log(1/u[i])
-                else:
-                    position[i] = P[i] + L[i]*np.log(1/u[i])
+                position[i] = P[i] + L[i]*np.log(1/u[i])
 
-        # Update velocity and position of particles.
-        #velocity *= friction
-        #velocity += (dv_g + dv_l)
-        #np.clip(velocity, -max_velocity, max_velocity, out=velocity)
 
-        #position += 
         to_update = (fun(position) < fun(pbest))
         if confunc is not None:
             to_update &= (confunc(position).sum(axis=1) < ctol)
