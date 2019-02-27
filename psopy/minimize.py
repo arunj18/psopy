@@ -169,6 +169,7 @@ def _minimize_pso(
         fval = fun(gbest[None])[0]
         if np.abs(oldfit - fval) < ptol:
             stable_count += 1
+            print("terminated at" ,ii)
             if stable_count == stable_iter:
                 break
         else:
@@ -263,8 +264,8 @@ def _minimize_qpso(
     beta = 3 / 2
     sigma = (gamma(1 + beta) * sin(pi * beta / 2) / (
         gamma((1 + beta) / 2) * beta * 2 ** ((beta - 1) / 2))) ** (1 / beta)
-    u = np.array([normalvariate(0, 1) for k in range(dimension)]) * sigma
-    v = np.array([normalvariate(0, 1) for k in range(dimension)])
+    u = np.random.normal(0,1,size=dimension) * sigma
+    v = np.random.normal(0,1,size=dimension)
     step = u / abs(v) ** (1 / beta)
 
     for ii in range(max_iter):
@@ -289,8 +290,7 @@ def _minimize_qpso(
             for i in range(0, nparam):
                 if uniform(0,1) < levy_rate:
                     stepsize = 0.2 * step * (position[i] - gbest)
-                    position[i] += stepsize * np.array([normalvariate(0, 1)
-                                                for k in range(dimension)])
+                    position[i] += stepsize * np.random.normal(0,1,size=dimension)
         
         L = 1/g * np.abs(position - P)
         
@@ -313,6 +313,7 @@ def _minimize_qpso(
         fval = fun(gbest[None])[0]
         if np.abs(oldfit - fval) < ptol:
             stable_count += 1
+            print("terminated at" ,ii)
             if stable_count == stable_iter:
                 break
         else:

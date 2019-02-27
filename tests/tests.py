@@ -1,7 +1,8 @@
 import numpy as np
-from psopy.minimize import minimize_qpso
+from psopy.minimize import minimize_qpso,minimize
 from psopy import init_feasible
 from scipy.optimize import rosen
+import time
 
 def test_rosendisc():
     """Test against the Rosenbrock function constrained to a disk."""
@@ -12,13 +13,27 @@ def test_rosendisc():
 
     def rosen(x):
         return (1 - x[0])**2 + 100*(x[1] - x[0]**2)**2
-
+    t0 = time.time()
     res = minimize_qpso(rosen, x0)
     converged = res.success
     print("Actual solution: ",sol)
+
     assert converged, res.message
     np.testing.assert_array_almost_equal(sol, res.x, 3)
+    t1= time.time()
+    x0 = init_feasible(cons, low=-1.5, high=1.5, shape=(1000, 2))
+    sol = np.array([1., 1.])
+    t2= time.time()
+    res = minimize(rosen, x0)
+    converged = res.success
+    print("Actual solution: ",sol)
 
+    assert converged, res.message
+    np.testing.assert_array_almost_equal(sol, res.x, 3)
+    t3 = time.time()
+    print(t1-t0)
+    print(t3-t2)
+    input()
 def test_mishra():
     """Test against the Mishra Bird function."""
 
