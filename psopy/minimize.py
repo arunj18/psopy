@@ -169,7 +169,6 @@ def _minimize_pso(
         fval = fun(gbest[None])[0]
         if np.abs(oldfit - fval) < ptol:
             stable_count += 1
-            print("terminated at" ,ii)
             if stable_count == stable_iter:
                 break
         else:
@@ -252,6 +251,12 @@ def _minimize_qpso(
     that does away with the need for the additional recursive calls needed to
     wrap the constraint and objective functions for compatibility with Scipy.
     """
+
+    if verbose:
+        message = setup_print(x0.shape[1], max_iter, confunc is not None)
+    if savefile:
+        iterinfo = []
+
     position = np.copy(x0)
     nparam = len(position)
     pbest = np.copy(position)
@@ -282,8 +287,6 @@ def _minimize_qpso(
             dv_l = psi_2 * pbest
 
         P = (dv_g + dv_l) / (psi_1 + psi_2)
-        print(P)
-
         u = uniform(0,1, nparam)
 
         if levy_rate > 0.0:
@@ -313,7 +316,6 @@ def _minimize_qpso(
         fval = fun(gbest[None])[0]
         if np.abs(oldfit - fval) < ptol:
             stable_count += 1
-            print("terminated at" ,ii)
             if stable_count == stable_iter:
                 break
         else:
@@ -585,9 +587,7 @@ def minimize(fun, x0, args=(), constraints=(), tol=None, callback=None,
 
     if constraints:
         options['confunc'] = gen_confunc(constraints, sttol, eqtol)
-
     return _minimize_pso(fun_, x0, **options)
-
 def minimize_qpso(fun, x0, args=(), constraints=(), tol=None, callback=None,
              options=None):
     """Minimization of scalar function of one or more variables using Particle
