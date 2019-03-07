@@ -83,10 +83,10 @@ def levi(x):
 def test_generic(args):
     """Test against the General function"""
     (tol,cons,sol,test_func,low,high,shape) = args
-    if low is None:
-        x0 = np.copy(low)
-    else:    
-        x0 = init_feasible(cons, low=low, high=high, shape=shape)
+    #if shape == 0:
+    #x0 = np.random.uniform(0, 2, (1000, 5))
+        #print('here')
+    x0 = init_feasible(cons, low=low, high=high, shape=shape)
     t0 = time.time()
     res = minimize_qpso(test_func, x0, tol=tol)
     t1= time.time()
@@ -97,10 +97,10 @@ def test_generic(args):
         np.testing.assert_array_almost_equal(sol, res.x, 3)
     except:
         qpso_converged = 1
-    if low is None:
-        x0 = np.copy(low)
-    else:
-        x0 = init_feasible(cons, low=low, high=high, shape=shape)
+  #  if high is None:
+    #x0 = np.random.uniform(0, 2, (1000, 5))
+   # else:
+    x0 = init_feasible(cons, low=low, high=high, shape=shape)
     t2= time.time()
     res = minimize(test_func,x0, tol=tol)
     t3 = time.time()
@@ -118,8 +118,9 @@ def test_generic(args):
 
 
 def stats_func(test_func,file_name,cons,high,low,shape,sol):
-    tol = [1e-1,1e-2,1e-3,1e-4,1e-5,1e-6,1e-7,1e-8,1e-9,1e-10,1e-11,1e-12,1e-13,1e-14,1e-15,1e-16,1e-17,1e-18,1e-19,1e-20]
-    qpso_fail = []
+    #tol = [1e-1,1e-2,1e-3,1e-4,1e-5,1e-6,1e-7,1e-8,1e-9,1e-10]
+    tol = [1e-1]
+    qpso_fai1l = []
     pso_fail = []
     mean_qpso_nit = []
     stddev_qpso_nit = []
@@ -135,6 +136,7 @@ def stats_func(test_func,file_name,cons,high,low,shape,sol):
         qpso_conv = 0
         pso_conv = 0
         results = []
+        test_generic([to,cons,sol,test_func,low,high,shape])
         r = p.map_async(test_generic,it.repeat([to,cons,sol,test_func,low,high,shape],100),callback=results.append)
         r.get()
         #test_generic([to,cons,sol,test_func,low,high,shape])
@@ -174,18 +176,23 @@ def stats_func(test_func,file_name,cons,high,low,shape,sol):
     }
     df = pd.DataFrame(data=stats)
     df.to_csv(file_name)
-
 def constraint_1(x):
-    return 25 - np.sum((x + 5) ** 2)
+    return -x[0]**2 - x[1]**2 + 2
 if __name__ == '__main__':
     mp.freeze_support()
-    cons = ({'type': 'ineq', 'fun': constraint_1},)      
-    low=-10
-    high=0
-    shape=(1000, 2)    
-    sol = np.array([-3.130, -1.582])
-
-    stats_func(mishra,"mishra.csv",cons,high,low,shape,sol)
+    cons = ({'type': 'ineq', 'fun': constraint_1},)
+    low = -1.5
+    high=1.5
+    shape = (1000,2)
+    sol = np.array([1.,1.])
+    x0 = init_feasible(cons, low=low, high=high, shape=shape)
+    res = minimize_qpso(rosen, x0)
+    print(res.x)
+    #x0 = np.random.uniform(-5, 5, (1000, 2))
+    #x0 = np.random.uniform(0, 2, (1000, 5))
+    #res = minimize(rosen, x0)
+    #converged = res.success
+    #stats_func(rosen,"test_levy.csv",cons,low,high,shape,sol)
     print("Done!")
     print("-------------------------------------------------")
     #test_generic(to,cons,sol,test_func,low,high,shape)

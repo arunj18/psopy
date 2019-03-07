@@ -17,7 +17,7 @@ Functions
 ===========================================================================================
 _minimize_pso       Optimize under optional constraints using a particle swarm.
 minimize            SciPy compatible interface to ``_minimize_pso``.
-_minimize_qpso      Optimize under optional constraints using qunatum behaved particle swarm
+_minimize_qpso      Optimize under optional constraints using quantum behaved particle swarm
 =================== =======================================================================
 
 """
@@ -265,16 +265,18 @@ def _minimize_qpso(
     stable_count = 0
     dimension = len(position[0])
 
-    
+    #simple levy walk. Make a decay function which will push particles around using stable_iter,max_iter is reached, pushing them away from pbest
     beta = 3 / 2
     sigma = (gamma(1 + beta) * sin(pi * beta / 2) / (
         gamma((1 + beta) / 2) * beta * 2 ** ((beta - 1) / 2))) ** (1 / beta)
-    u = np.random.normal(0,1,size=dimension) * sigma
-    v = np.random.normal(0,1,size=dimension)
-    step = u / abs(v) ** (1 / beta)
-
+    
+    #print(step)
+    #input()
     for ii in range(max_iter):
         # Determine global and local gradient.
+        u = np.random.normal(0,1,size=dimension) * sigma
+        v = np.random.normal(0,1,size=dimension)
+        step = u / abs(v) ** (1 / beta)
         psi_1 = uniform(0,1)
         psi_2 = uniform(0,1)
         dv_g = psi_1 * gbest
@@ -288,22 +290,27 @@ def _minimize_qpso(
 
         P = (dv_g + dv_l) / (psi_1 + psi_2)
         u = uniform(0,1, nparam)
-
-        if levy_rate > 0.0:
-            for i in range(0, nparam):
-                if uniform(0,1) < levy_rate:
-                    stepsize = 0.2 * step * (position[i] - gbest)
-                    position[i] += stepsize * np.random.normal(0,1,size=dimension)
-        
         L = 1/g * np.abs(position - P)
-        
         for i in range(0, nparam):
+            stepsize = 0.01 * step * (1/(0.0000001 + position[i] - pbest[i])) #something like this pushing it away from pbest or should it be gbest?
+            #print(stepsize)
+            #print(P[i].shape,stepsize.shape,L[i].shape)
+            print(stepsize*L[i]*np.log(1/u[i]))
+            #for iii in len(stepsize):
+            #    L[i][iii] = stepsize[iii]*L[i][iii]
+            #input()
             if uniform(0,1) > 0.5:
-                position[i] = P[i] - L[i]*np.log(1/u[i])
+                position[i] = P[i] - stepsize*L[i]*np.log(1/u[i])
             else:
-                position[i] = P[i] + L[i]*np.log(1/u[i])
-
-
+                position[i] = P[i] + stepsize*L[i]*np.log(1/u[i])
+        if ii % 10 == 0:
+            print(position)
+            input()
+        #for i in range(0, nparam)
+        #    if uniform(0,1) > 0.5:
+        #        position[i] = P[i] - L[i]*np.log(1/u[i])
+        #    else:
+        #        position[i] = P[i] + L[i]*np.log(1/u[i])
         to_update = (fun(position) < fun(pbest))
         if confunc is not None:
             to_update &= (confunc(position).sum(axis=1) < ctol)
