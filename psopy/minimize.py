@@ -218,7 +218,7 @@ def _minimize_pso(
 def _minimize_qpso(
         fun, x0, confunc=None, g=.96, 
         max_iter=1000, stable_iter=100, ptol=1e-6, ctol=1e-6,
-        levy_rate=0.0,
+        levy_rate=0.0, reduction_rate=0.5
         callback=None, verbose=False, savefile=None):
     """Internal implementation for ``psopy.minimize_qpso``.
 
@@ -289,6 +289,7 @@ def _minimize_qpso(
             dv_l = psi_2 * pbest
 
         P = (dv_g + dv_l) / (psi_1 + psi_2)
+        decay = (1 - (ii/max_iter)**reduction_rate) * uniform(0,1)
         u = uniform(0,1, nparam)
         L = 1/g * np.abs(position - P)
         for i in range(0, nparam):
@@ -300,9 +301,9 @@ def _minimize_qpso(
             #    L[i][iii] = stepsize[iii]*L[i][iii]
             #input()
             if uniform(0,1) > 0.5:
-                position[i] = P[i] - stepsize*L[i]*np.log(1/u[i])
+                position[i] = P[i] - stepsize*L[i]*np.log(1/u[i])*decay
             else:
-                position[i] = P[i] + stepsize*L[i]*np.log(1/u[i])
+                position[i] = P[i] + stepsize*L[i]*np.log(1/u[i])*decay
         if ii % 10 == 0:
             print(position)
             input()
