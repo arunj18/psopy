@@ -218,7 +218,7 @@ def _minimize_pso(
 def _minimize_qpso(
         fun, x0, confunc=None, g=.96, 
         max_iter=1000, stable_iter=100, ptol=1e-6, ctol=1e-6,
-        levy_rate=0.0, reduction_rate=0.5
+        levy_rate=0, decay_rate=0, reduction_rate=0.5,
         callback=None, verbose=False, savefile=None):
     """Internal implementation for ``psopy.minimize_qpso``.
 
@@ -269,7 +269,8 @@ def _minimize_qpso(
     beta = 3 / 2
     sigma = (gamma(1 + beta) * sin(pi * beta / 2) / (
         gamma((1 + beta) / 2) * beta * 2 ** ((beta - 1) / 2))) ** (1 / beta)
-    
+    decay = 1
+    stepsize = 1.0
     #print(step)
     #input()
     for ii in range(max_iter):
@@ -289,14 +290,17 @@ def _minimize_qpso(
             dv_l = psi_2 * pbest
 
         P = (dv_g + dv_l) / (psi_1 + psi_2)
-        decay = (1 - (ii/max_iter)**reduction_rate) * uniform(0,1)
+        if decay_rate > 0:
+            decay = (1 - (ii/max_iter)**reduction_rate) * uniform(0,1)
         u = uniform(0,1, nparam)
         L = 1/g * np.abs(position - P)
+        stepsize = 1.0
         for i in range(0, nparam):
-            stepsize = 0.01 * step * (1/(0.0000001 + position[i] - pbest[i])) #something like this pushing it away from pbest or should it be gbest?
+            if levy_rate > 0:
+                stepsize = 0.01 * step * (1/(0.0000001 + position[i] - pbest[i])) #something like this pushing it away from pbest or should it be gbest?
             #print(stepsize)
             #print(P[i].shape,stepsize.shape,L[i].shape)
-            print(stepsize*L[i]*np.log(1/u[i]))
+            #print(stepsize*L[i]*np.log(1/u[i]))
             #for iii in len(stepsize):
             #    L[i][iii] = stepsize[iii]*L[i][iii]
             #input()
@@ -304,9 +308,10 @@ def _minimize_qpso(
                 position[i] = P[i] - stepsize*L[i]*np.log(1/u[i])*decay
             else:
                 position[i] = P[i] + stepsize*L[i]*np.log(1/u[i])*decay
-        if ii % 10 == 0:
+        """if ii % 10 == 0:
             print(position)
             input()
+        """
         #for i in range(0, nparam)
         #    if uniform(0,1) > 0.5:
         #        position[i] = P[i] - L[i]*np.log(1/u[i])

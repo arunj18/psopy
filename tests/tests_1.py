@@ -245,66 +245,6 @@ if __name__ == '__main__':
         res_p = [res.fun, res.nit, res.nsit, res.status, res.success, res.x[0], res.x[1]]         
         wr.writerow(res_p)
     fd.close()
-    
-"""
-    #----------------------------------------------
-    print("Testing qpso")
-    print("rosen")
-    fd = open('qpso_rosen.csv','a')  
-    wr = csv.writer(fd, dialect='excel')
-    for i in range(30):
-        print(i)
-        cons = ({'type': 'ineq', 'fun': rosen},)
-        x0 = init_feasible(cons, low=low, high=high, shape=shape)
-        res = minimize_qpso(rosen, x0)
-        res_p = [res.fun, res.nit, res.nsit, res.status, res.success, res.x[0], res.x[1]]         
-        wr.writerow(res_p)
-    fd.close()
-    print("rosen_def")
-    fd = open('qpso_rosen_def.csv','a')  
-    wr = csv.writer(fd, dialect='excel')
-    for i in range(30):
-        print(i)
-        cons = ({'type': 'ineq', 'fun': rosen_def},)
-        x0 = init_feasible(cons, low=low, high=high, shape=shape)
-        res = minimize_qpso(rosen_def, x0)
-        res_p = [res.fun, res.nit, res.nsit, res.status, res.success, res.x[0], res.x[1]]         
-        wr.writerow(res_p)
-    fd.close()
-    print("mishra")
-    fd = open('qpso_mishra.csv','a')  
-    wr = csv.writer(fd, dialect='excel')
-    for i in range(30):
-        print(i)
-        cons = ({'type': 'ineq', 'fun': mishra},)
-        x0 = init_feasible(cons, low=low, high=high, shape=shape)
-        res = minimize_qpso(mishra, x0)
-        res_p = [res.fun, res.nit, res.nsit, res.status, res.success, res.x[0], res.x[1]]         
-        wr.writerow(res_p)
-    fd.close()
-    print("ackley")
-    fd = open('qpso_ackley.csv','a')  
-    wr = csv.writer(fd, dialect='excel')
-    for i in range(30):
-        print(i)
-        cons = ({'type': 'ineq', 'fun': ackley},)
-        x0 = init_feasible(cons, low=low, high=high, shape=shape)
-        res = minimize_qpso(ackley, x0)
-        res_p = [res.fun, res.nit, res.nsit, res.status, res.success, res.x[0], res.x[1]]         
-        wr.writerow(res_p)
-    fd.close()
-    print("levi")
-    fd = open('qpso_levi.csv','a')  
-    wr = csv.writer(fd, dialect='excel')
-    for i in range(30):
-        print(i)
-        cons = ({'type': 'ineq', 'fun': levi},)
-        x0 = init_feasible(cons, low=low, high=high, shape=shape)
-        res = minimize_qpso(levi, x0)
-        res_p = [res.fun, res.nit, res.nsit, res.status, res.success, res.x[0], res.x[1]]         
-        wr.writerow(res_p)
-    fd.close()
-"""   
     #-----------------------------------------------------
     
     print("Testing qpso with levy and decay")
@@ -365,64 +305,6 @@ if __name__ == '__main__':
     fd.close()
 
     #-------------------------------------------------------------------------
-"""
-    print("Testing pso")
-    print("rosen")
-    fd = open('pso_rosen.csv','a')  
-    wr = csv.writer(fd, dialect='excel')
-    for i in range(30):
-        print(i)
-        cons = ({'type': 'ineq', 'fun': rosen},)
-        x0 = init_feasible(cons, low=low, high=high, shape=shape)
-        res = minimize(rosen, x0)
-        res_p = [res.fun, res.nit, res.nsit, res.status, res.success, res.x[0], res.x[1]]         
-        wr.writerow(res_p)
-    fd.close()
-    print("rosen_def")
-    fd = open('pso_rosen_def.csv','a')  
-    wr = csv.writer(fd, dialect='excel')
-    for i in range(30):
-        print(i)
-        cons = ({'type': 'ineq', 'fun': rosen_def},)
-        x0 = init_feasible(cons, low=low, high=high, shape=shape)
-        res = minimize(rosen_def, x0)
-        res_p = [res.fun, res.nit, res.nsit, res.status, res.success, res.x[0], res.x[1]]         
-        wr.writerow(res_p)
-    fd.close()
-    print("mishra")
-    fd = open('pso_mishra.csv','a')  
-    wr = csv.writer(fd, dialect='excel')
-    for i in range(30):
-        print(i)
-        cons = ({'type': 'ineq', 'fun': mishra},)
-        x0 = init_feasible(cons, low=low, high=high, shape=shape)
-        res = minimize(mishra, x0)
-        res_p = [res.fun, res.nit, res.nsit, res.status, res.success, res.x[0], res.x[1]]         
-        wr.writerow(res_p)
-    fd.close()
-    print("ackley")
-    fd = open('pso_ackley.csv','a')  
-    wr = csv.writer(fd, dialect='excel')
-    for i in range(30):
-        print(i)
-        cons = ({'type': 'ineq', 'fun': ackley},)
-        x0 = init_feasible(cons, low=low, high=high, shape=shape)
-        res = minimize(ackley, x0)
-        res_p = [res.fun, res.nit, res.nsit, res.status, res.success, res.x[0], res.x[1]]         
-        wr.writerow(res_p)
-    fd.close()
-    print("levi")
-    fd = open('pso_levi.csv','a')  
-    wr = csv.writer(fd, dialect='excel')
-    for i in range(30):
-        print(i)
-        cons = ({'type': 'ineq', 'fun': levi},)
-        x0 = init_feasible(cons, low=low, high=high, shape=shape)
-        res = minimize(levi, x0)
-        res_p = [res.fun, res.nit, res.nsit, res.status, res.success, res.x[0], res.x[1]]         
-        wr.writerow(res_p)
-    fd.close()
-"""
 
     #x0 = np.random.uniform(-5, 5, (1000, 2))
     #x0 = np.random.uniform(0, 2, (1000, 5))
