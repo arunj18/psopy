@@ -8,3 +8,8 @@ __pycache__/
 build/
 dist/
 psopy/minimize_new.py
+tests/results.txt
+tests/results_levy.txt
+tests/results_levy_decay.txt
+tests/results_levy_decay_g.txt
+tests/results_pso.txt
