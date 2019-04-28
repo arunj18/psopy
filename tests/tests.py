@@ -1,6 +1,7 @@
 import numpy as np
 from psopy.minimize import minimize_qpso,minimize
 from psopy import init_feasible
+from psopy.constraints import init_lorenz_chaos
 from scipy.optimize import rosen
 import time
 import pandas as pd
@@ -87,7 +88,7 @@ def test_generic(args):
     #if shape == 0:
     #x0 = np.random.uniform(0, 2, (1000, 5))
         #print('here')
-    x0 = init_feasible(cons, low=low, high=high, shape=shape)
+    x0 = init_lorenz_chaos(shape=shape,low=low,high=high) 
     t0 = time.time()
     res = minimize_qpso(test_func, x0, tol=tol)
     t1= time.time()
@@ -101,7 +102,7 @@ def test_generic(args):
   #  if high is None:
     #x0 = np.random.uniform(0, 2, (1000, 5))
    # else:
-    x0 = init_feasible(cons, low=low, high=high, shape=shape)
+    x0 = init_lorenz_chaos(shape=shape,low=low,high=high) 
     t2= time.time()
     res = minimize(test_func,x0, tol=tol)
     t3 = time.time()
@@ -182,9 +183,9 @@ def constraint_1(x):
 
 if __name__ == '__main__':
     mp.freeze_support()
-    fd = open('qpso_levy.csv','a')
+    #d = open('qpso_levy.csv','a')
     low = -1.5
-    high=1.5
+    high = 1.5
     shape = (1000,2)
     sol = np.array([1.,1.])
 
@@ -194,9 +195,10 @@ if __name__ == '__main__':
     fd = open('qpso_levy_rosen.csv','a')  
     wr = csv.writer(fd, dialect='excel')
     for i in range(30):
-        print(i)
+        #print(i)
         cons = ({'type': 'ineq', 'fun': rosen},)
-        x0 = init_feasible(cons, low=low, high=high, shape=shape)
+        #x0 = init_lorenz_chaos(shape=shape,low=low,high=high) 
+        x0 = init_lorenz_chaos(shape=shape,low=low,high=high) 
         res = minimize_qpso(rosen, x0, options={'levy_rate':1})
         res_p = [res.fun, res.nit, res.nsit, res.status, res.success, res.x[0], res.x[1]]
         wr.writerow(res_p)
@@ -207,7 +209,7 @@ if __name__ == '__main__':
     for i in range(30):
         print(i)
         cons = ({'type': 'ineq', 'fun': rosen_def},)
-        x0 = init_feasible(cons, low=low, high=high, shape=shape)
+        x0 = init_lorenz_chaos(shape=shape,low=low,high=high) 
         res = minimize_qpso(rosen_def, x0, options={'levy_rate':1})
         res_p = [res.fun, res.nit, res.nsit, res.status, res.success, res.x[0], res.x[1]]
         wr.writerow(res_p)
@@ -218,7 +220,7 @@ if __name__ == '__main__':
     for i in range(30):
         print(i)
         cons = ({'type': 'ineq', 'fun': mishra},)
-        x0 = init_feasible(cons, low=low, high=high, shape=shape)
+        x0 = init_lorenz_chaos(shape=shape,low=low,high=high) 
         res = minimize_qpso(mishra, x0, options={'levy_rate':1})
         res_p = [res.fun, res.nit, res.nsit, res.status, res.success, res.x[0], res.x[1]]         
         wr.writerow(res_p)
@@ -229,7 +231,7 @@ if __name__ == '__main__':
     for i in range(30):
         print(i)
         cons = ({'type': 'ineq', 'fun': ackley},)
-        x0 = init_feasible(cons, low=low, high=high, shape=shape)
+        x0 = init_lorenz_chaos(shape=shape,low=low,high=high) 
         res = minimize_qpso(ackley, x0, options={'levy_rate':1})
         res_p = [res.fun, res.nit, res.nsit, res.status, res.success, res.x[0], res.x[1]]         
         wr.writerow(res_p)
@@ -240,13 +242,13 @@ if __name__ == '__main__':
     for i in range(30):
         print(i)
         cons = ({'type': 'ineq', 'fun': levi},)
-        x0 = init_feasible(cons, low=low, high=high, shape=shape)
+        x0 = init_lorenz_chaos(shape=shape,low=low,high=high) 
         res = minimize_qpso(levi, x0, options={'levy_rate':1})
         res_p = [res.fun, res.nit, res.nsit, res.status, res.success, res.x[0], res.x[1]]         
         wr.writerow(res_p)
     fd.close()
     
-"""
+
     #----------------------------------------------
     print("Testing qpso")
     print("rosen")
@@ -255,7 +257,7 @@ if __name__ == '__main__':
     for i in range(30):
         print(i)
         cons = ({'type': 'ineq', 'fun': rosen},)
-        x0 = init_feasible(cons, low=low, high=high, shape=shape)
+        x0 = init_lorenz_chaos(shape=shape,low=low,high=high) 
         res = minimize_qpso(rosen, x0)
         res_p = [res.fun, res.nit, res.nsit, res.status, res.success, res.x[0], res.x[1]]         
         wr.writerow(res_p)
@@ -266,7 +268,7 @@ if __name__ == '__main__':
     for i in range(30):
         print(i)
         cons = ({'type': 'ineq', 'fun': rosen_def},)
-        x0 = init_feasible(cons, low=low, high=high, shape=shape)
+        x0 = init_lorenz_chaos(shape=shape,low=low,high=high) 
         res = minimize_qpso(rosen_def, x0)
         res_p = [res.fun, res.nit, res.nsit, res.status, res.success, res.x[0], res.x[1]]         
         wr.writerow(res_p)
@@ -277,7 +279,7 @@ if __name__ == '__main__':
     for i in range(30):
         print(i)
         cons = ({'type': 'ineq', 'fun': mishra},)
-        x0 = init_feasible(cons, low=low, high=high, shape=shape)
+        x0 = init_lorenz_chaos(shape=shape,low=low,high=high) 
         res = minimize_qpso(mishra, x0)
         res_p = [res.fun, res.nit, res.nsit, res.status, res.success, res.x[0], res.x[1]]         
         wr.writerow(res_p)
@@ -288,7 +290,7 @@ if __name__ == '__main__':
     for i in range(30):
         print(i)
         cons = ({'type': 'ineq', 'fun': ackley},)
-        x0 = init_feasible(cons, low=low, high=high, shape=shape)
+        x0 = init_lorenz_chaos(shape=shape,low=low,high=high) 
         res = minimize_qpso(ackley, x0)
         res_p = [res.fun, res.nit, res.nsit, res.status, res.success, res.x[0], res.x[1]]         
         wr.writerow(res_p)
@@ -299,12 +301,12 @@ if __name__ == '__main__':
     for i in range(30):
         print(i)
         cons = ({'type': 'ineq', 'fun': levi},)
-        x0 = init_feasible(cons, low=low, high=high, shape=shape)
+        x0 = init_lorenz_chaos(shape=shape,low=low,high=high) 
         res = minimize_qpso(levi, x0)
         res_p = [res.fun, res.nit, res.nsit, res.status, res.success, res.x[0], res.x[1]]         
         wr.writerow(res_p)
     fd.close()
-"""   
+
     #-----------------------------------------------------
     
     print("Testing qpso with levy and decay")
@@ -314,7 +316,7 @@ if __name__ == '__main__':
     for i in range(30):
         print(i)
         cons = ({'type': 'ineq', 'fun': rosen},)
-        x0 = init_feasible(cons, low=low, high=high, shape=shape)
+        x0 = init_lorenz_chaos(shape=shape,low=low,high=high) 
         res = minimize_qpso(rosen, x0, options={'levy_rate':1, 'decay_rate':1})
         res_p = [res.fun, res.nit, res.nsit, res.status, res.success, res.x[0], res.x[1]]         
         wr.writerow(res_p)
@@ -325,7 +327,7 @@ if __name__ == '__main__':
     for i in range(30):
         print(i)
         cons = ({'type': 'ineq', 'fun': rosen_def},)
-        x0 = init_feasible(cons, low=low, high=high, shape=shape)
+        x0 = init_lorenz_chaos(shape=shape,low=low,high=high) 
         res = minimize_qpso(rosen_def, x0, options={'levy_rate':1, 'decay_rate':1})
         res_p = [res.fun, res.nit, res.nsit, res.status, res.success, res.x[0], res.x[1]]         
         wr.writerow(res_p)
@@ -336,7 +338,7 @@ if __name__ == '__main__':
     for i in range(30):
         print(i)
         cons = ({'type': 'ineq', 'fun': mishra},)
-        x0 = init_feasible(cons, low=low, high=high, shape=shape)
+        x0 = init_lorenz_chaos(shape=shape,low=low,high=high) 
         res = minimize_qpso(mishra, x0, options={'levy_rate':1, 'decay_rate':1})
         res_p = [res.fun, res.nit, res.nsit, res.status, res.success, res.x[0], res.x[1]]         
         wr.writerow(res_p)
@@ -347,7 +349,7 @@ if __name__ == '__main__':
     for i in range(30):
         print(i)
         cons = ({'type': 'ineq', 'fun': ackley},)
-        x0 = init_feasible(cons, low=low, high=high, shape=shape)
+        x0 = init_lorenz_chaos(shape=shape,low=low,high=high) 
         res = minimize_qpso(ackley, x0, options={'levy_rate':1, 'decay_rate':1})
         res_p = [res.fun, res.nit, res.nsit, res.status, res.success, res.x[0], res.x[1]]         
         wr.writerow(res_p)
@@ -358,14 +360,14 @@ if __name__ == '__main__':
     for i in range(30):
         print(i)
         cons = ({'type': 'ineq', 'fun': levi},)
-        x0 = init_feasible(cons, low=low, high=high, shape=shape)
+        x0 = init_lorenz_chaos(shape=shape,low=low,high=high) 
         res = minimize_qpso(levi, x0, options={'levy_rate':1, 'decay_rate':1})
         res_p = [res.fun, res.nit, res.nsit, res.status, res.success, res.x[0], res.x[1]]         
         wr.writerow(res_p)
     fd.close()
 
     #-------------------------------------------------------------------------
-"""
+
     print("Testing pso")
     print("rosen")
     fd = open('pso_rosen.csv','a')  
@@ -373,7 +375,7 @@ if __name__ == '__main__':
     for i in range(30):
         print(i)
         cons = ({'type': 'ineq', 'fun': rosen},)
-        x0 = init_feasible(cons, low=low, high=high, shape=shape)
+        x0 = init_lorenz_chaos(shape=shape,low=low,high=high) 
         res = minimize(rosen, x0)
         res_p = [res.fun, res.nit, res.nsit, res.status, res.success, res.x[0], res.x[1]]         
         wr.writerow(res_p)
@@ -384,7 +386,7 @@ if __name__ == '__main__':
     for i in range(30):
         print(i)
         cons = ({'type': 'ineq', 'fun': rosen_def},)
-        x0 = init_feasible(cons, low=low, high=high, shape=shape)
+        x0 = init_lorenz_chaos(shape=shape,low=low,high=high) 
         res = minimize(rosen_def, x0)
         res_p = [res.fun, res.nit, res.nsit, res.status, res.success, res.x[0], res.x[1]]         
         wr.writerow(res_p)
@@ -395,7 +397,7 @@ if __name__ == '__main__':
     for i in range(30):
         print(i)
         cons = ({'type': 'ineq', 'fun': mishra},)
-        x0 = init_feasible(cons, low=low, high=high, shape=shape)
+        x0 = init_lorenz_chaos(shape=shape,low=low,high=high) 
         res = minimize(mishra, x0)
         res_p = [res.fun, res.nit, res.nsit, res.status, res.success, res.x[0], res.x[1]]         
         wr.writerow(res_p)
@@ -406,7 +408,7 @@ if __name__ == '__main__':
     for i in range(30):
         print(i)
         cons = ({'type': 'ineq', 'fun': ackley},)
-        x0 = init_feasible(cons, low=low, high=high, shape=shape)
+        x0 = init_lorenz_chaos(shape=shape,low=low,high=high) 
         res = minimize(ackley, x0)
         res_p = [res.fun, res.nit, res.nsit, res.status, res.success, res.x[0], res.x[1]]         
         wr.writerow(res_p)
@@ -417,12 +419,12 @@ if __name__ == '__main__':
     for i in range(30):
         print(i)
         cons = ({'type': 'ineq', 'fun': levi},)
-        x0 = init_feasible(cons, low=low, high=high, shape=shape)
+        x0 = init_lorenz_chaos(shape=shape,low=low,high=high) 
         res = minimize(levi, x0)
         res_p = [res.fun, res.nit, res.nsit, res.status, res.success, res.x[0], res.x[1]]         
         wr.writerow(res_p)
     fd.close()
-"""
+
 
     #x0 = np.random.uniform(-5, 5, (1000, 2))
     #x0 = np.random.uniform(0, 2, (1000, 5))

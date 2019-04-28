@@ -47,7 +47,7 @@ STATUS_MESSAGES = namedtuple(
 
 def _minimize_pso(
         fun, x0, confunc=None, friction=.8, max_velocity=5., g_rate=.8,
-        l_rate=.5, max_iter=1000, stable_iter=100, ptol=1e-6, ctol=1e-6,
+        l_rate=.5, max_iter=1000, stable_iter=20, ptol=1e-6, ctol=1e-6,
         callback=None, verbose=False, savefile=None):
     """Internal implementation for ``psopy.minimize``.
 
@@ -217,7 +217,7 @@ def _minimize_pso(
 
 def _minimize_qpso(
         fun, x0, confunc=None, g=.96, 
-        max_iter=1000, stable_iter=100, ptol=1e-6, ctol=1e-6,
+        max_iter=1000, stable_iter=40, ptol=1e-6, ctol=1e-6,
         levy_rate=0, decay_rate=0, reduction_rate=0.5,
         callback=None, verbose=False, savefile=None):
     """Internal implementation for ``psopy.minimize_qpso``.
@@ -271,10 +271,8 @@ def _minimize_qpso(
         gamma((1 + beta) / 2) * beta * 2 ** ((beta - 1) / 2))) ** (1 / beta)
     decay = 1
     stepsize = 1.0
-    #print(step)
-    #input()
     for ii in range(max_iter):
-        # Determine global and local gradient.
+        mbest = np.sum(pbest,axis=0)/pbest.shape[0]
         u = np.random.normal(0,1,size=dimension) * sigma
         v = np.random.normal(0,1,size=dimension)
         step = u / abs(v) ** (1 / beta)
@@ -290,24 +288,21 @@ def _minimize_qpso(
             dv_l = psi_2 * pbest
 
         P = (dv_g + dv_l) / (psi_1 + psi_2)
-        if decay_rate > 0:
-            decay = (1 - (ii/max_iter)**reduction_rate) * uniform(0,1)
         u = uniform(0,1, nparam)
-        L = 1/g * np.abs(position - P)
+        #L = 1/g * np.abs(position - P)
         stepsize = 1.0
         for i in range(0, nparam):
             if levy_rate > 0:
-                stepsize = 0.01 * step * (1/(0.0000001 + position[i] - pbest[i])) #something like this pushing it away from pbest or should it be gbest?
-            #print(stepsize)
-            #print(P[i].shape,stepsize.shape,L[i].shape)
-            #print(stepsize*L[i]*np.log(1/u[i]))
-            #for iii in len(stepsize):
-            #    L[i][iii] = stepsize[iii]*L[i][iii]
-            #input()
+                stepsize = 0.01 * step * (1/(0.0000001 + position[i] - pbest[i])) 
+                if decay_rate > 0:
+                    decay = stepsize*5*(0.001)**(ii/(max_iter*0.05)) + 1
+                    if ii == int(max_iter*0.05):
+                        decay = 1
+        
             if uniform(0,1) > 0.5:
-                position[i] = P[i] - stepsize*L[i]*np.log(1/u[i])*decay
+                position[i] = P[i] - mbest*np.log(1/u[i])*decay
             else:
-                position[i] = P[i] + stepsize*L[i]*np.log(1/u[i])*decay
+                position[i] = P[i] + mbest*np.log(1/u[i])*decay
         """if ii % 10 == 0:
             print(position)
             input()

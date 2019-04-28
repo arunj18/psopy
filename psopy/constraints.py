@@ -14,7 +14,7 @@ init_feasible  Initialize feasible solutions.
 """
 
 import numpy as np
-
+import random
 
 def gen_confunc(constraints, sttol=1e-6, eqtol=1e-7):
     """Convert the list of constraints to a function that returns the
@@ -242,6 +242,7 @@ def init_feasible(constraints, shape, low=0., high=1., max_retries=500):
 
     """
     out = np.random.uniform(low, high, size=shape)
+    #print(shape)
     if constraints:
         cfunc = gen_confunc(constraints)
         condn = (cfunc(out).sum(1) != 0)
@@ -254,3 +255,45 @@ def init_feasible(constraints, shape, low=0., high=1., max_retries=500):
             if not retry:
                 return None
     return out
+
+def lorenz(x, y, z):
+    s = 10.
+    r = 28.
+    b = 8/3.0
+    x_dot = s*(y - x)
+    y_dot = r*x - y - x*z
+    z_dot = x*y - b*z
+    return x_dot, y_dot, z_dot
+
+def init_lorenz_chaos(shape, low=0., high=1.):
+    chaos_limits = { "x_high" : 22.0 , "x_low" : -22.0 , "y_high" : 30.0 , "y_low" : -30.0 , "z_high" : 55.0 , "z_low" : 0.0 }
+    lorenz_sets = shape[1]//3 + 1
+    chaos_set = {}
+    for it in range(lorenz_sets):
+        chaos_set["xs_list_" + str(it+1)] = []
+        chaos_set["ys_list_" + str(it+1)] = []
+        chaos_set["zs_list_" + str(it+1)] = []
+        dt = 0.01
+        xs = np.empty((shape[0]+1))
+        ys = np.empty((shape[0]+1))
+        zs = np.empty((shape[0]+1))
+        xs[0], ys[0], zs[0] = (np.random.rand(), np.random.rand(), np.random.rand())
+        for i in range(shape[0]):
+            # Derivatives of the X, Y, Z state
+            x_dot, y_dot, z_dot = lorenz(xs[i], ys[i], zs[i])
+            xs[i + 1] = xs[i] + (x_dot * dt)
+            ys[i + 1] = ys[i] + (y_dot * dt)
+            zs[i + 1] = zs[i] + (z_dot * dt)
+        chaos_set["xs_list_" + str(it+1)].extend(xs)
+        chaos_set["ys_list_" + str(it+1)].extend(ys)
+        chaos_set["zs_list_" + str(it+1)].extend(zs)
+    choices = list(chaos_set.keys())
+    #print(chaos_set)
+    random.shuffle(choices)
+    result = []
+    for i in range(shape[0]):
+        temp = []
+        for i_1 in range(shape[1]):       
+            temp.append(((chaos_set[choices[i_1]][i] - chaos_limits[choices[i_1][0]+"_low"])/(chaos_limits[choices[i_1][0]+"_high"] - chaos_limits[choices[i_1][0]+"_low"])) * (high - low) + low)
+        result.append(temp)
+    return np.array(result)
