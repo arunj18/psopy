@@ -293,11 +293,11 @@ def _minimize_qpso(
         stepsize = 1.0
         for i in range(0, nparam):
             if levy_rate > 0:
-                stepsize = 0.01 * step * (1/(0.0000001 + position[i] - pbest[i])) 
+                stepsize = 0.01 * step * (1/(0.0000001 + position[i] - gbest[i])) 
                 if decay_rate > 0:
                     decay = stepsize*5*(0.001)**(ii/(max_iter*0.05)) + 1
-                    if ii == int(max_iter*0.05):
-                        decay = 1
+                    #if ii == int(max_iter*0.05):
+                    #    decay = 1
         
             if uniform(0,1) > 0.5:
                 position[i] = P[i] - mbest*np.log(1/u[i])*decay
