@@ -245,11 +245,18 @@ def _minimize_qpso(
         The function that describes constraints. Must be of the form
         ``confunc(pos)`` that returns the constraint matrix.
 
+    levy_rate: float
+        Whether to run the levy decay qpso or not. > 0 value turns on levy walk
+
+    decay_rate: float
+        Whether to turn on the decay function or not. > 0 value turns on the decay rate 
+
     Notes
     -----
+    Chaotic Quantum PSO
     Using this function directly allows for a slightly faster implementation
     that does away with the need for the additional recursive calls needed to
-    wrap the constraint and objective functions for compatibility with Scipy.
+    wrap the constraint and objective functions for compatibility with Scipy. 
     """
 
     if verbose:
@@ -289,29 +296,19 @@ def _minimize_qpso(
 
         P = (dv_g + dv_l) / (psi_1 + psi_2)
         u = uniform(0,1, nparam)
-        #L = 1/g * np.abs(position - P)
+
         stepsize = 1.0
         for i in range(0, nparam):
             if levy_rate > 0:
                 stepsize = 0.01 * step * (1/(0.0000001 + position[i] - gbest[i])) 
                 if decay_rate > 0:
                     decay = stepsize*5*(0.001)**(ii/(max_iter*0.05)) + 1
-                    #if ii == int(max_iter*0.05):
-                    #    decay = 1
         
             if uniform(0,1) > 0.5:
                 position[i] = P[i] - mbest*np.log(1/u[i])*decay
             else:
                 position[i] = P[i] + mbest*np.log(1/u[i])*decay
-        """if ii % 10 == 0:
-            print(position)
-            input()
-        """
-        #for i in range(0, nparam)
-        #    if uniform(0,1) > 0.5:
-        #        position[i] = P[i] - L[i]*np.log(1/u[i])
-        #    else:
-        #        position[i] = P[i] + L[i]*np.log(1/u[i])
+        
         to_update = (fun(position) < fun(pbest))
         if confunc is not None:
             to_update &= (confunc(position).sum(axis=1) < ctol)
@@ -598,8 +595,8 @@ def minimize(fun, x0, args=(), constraints=(), tol=None, callback=None,
     return _minimize_pso(fun_, x0, **options)
 def minimize_qpso(fun, x0, args=(), constraints=(), tol=None, callback=None,
              options=None):
-    """Minimization of scalar function of one or more variables using Particle
-    Swarm Optimization (PSO).
+    """Minimization of scalar function of one or more variables using Quantum Particle
+    Swarm Optimization (QPSO).
 
     Parameters
     ----------
@@ -698,56 +695,12 @@ def minimize_qpso(fun, x0, args=(), constraints=(), tol=None, callback=None,
 
     See Also
     --------
-    psopy._minimize_pso : Internal implementation for PSO. May be faster to use
+    psopy._minimize_qpso : Internal implementation for QPSO. May be faster to use
         directly.
     psopy.gen_confunc : Converts the constraints definition to a function
         that returns the constraint matrix when run on the position matrix.
 
-    Notes
-    -----
-    Particle Swarm Optimization (PSO) [1]_ is a biologically inspired
-    metaheuristic for finding the global minima of a function. It works by
-    iteratively converging a population of randomly initialized solutions,
-    called particles, toward a globally optimal solution. Each particle in the
-    population keeps track of its current position and the best solution it has
-    encountered, called ``pbest``. Each particle has an associated
-    velocity used to traverse the search space. The swarm keeps track of the
-    overall best solution, called ``gbest``. Each iteration of the swarm
-    updates the velocity of the particle toward a weighted sum of the ``pbest``
-    and ``gbest``. The velocity of the particle is then added to the position
-    of the particle.
-
-    Shi and Eberhart [2]_ describe using an inertial weight, or a friction
-    parameter, to balance the effect of the global and local search. This acts
-    as a limiting factor to ensure velocity does not increase, or decrease,
-    unbounded.
-
-    **Constrained Optimization**
-
-    The standard PSO algorithm does not guarantee that the individual solutions
-    will converge to a feasible global solution. To solve this, Lorem and Ipsum
-    [3]_ suggested an approach where each particle selects another particle,
-    called the leader and uses this particle's ``pbest`` value, instead of its
-    own, to update its velocity. The leader for a given particle is selected by
-    picking the particle whose ``pbest`` is closest to the current position of
-    the given particle. Further, ``pbest`` is updated only those particles
-    where the sum of the constraint vector is less than the constraint
-    tolerance.
-
-    References
-    ----------
-    .. [1] Eberhart, R. and Kennedy, J., 1995, October. A new optimizer
-        using particle swarm theory. In Micro Machine and Human Science, 1995.
-        MHS'95., Proceedings of the Sixth International Symposium on (pp.
-        39-43). IEEE.
-    .. [2] Shi, Y. and Eberhart, R., 1998, May. A modified particle swarm
-        optimizer. In Evolutionary Computation Proceedings, 1998. IEEE World
-        Congress on Computational Intelligence., The 1998 IEEE International
-        Conference on (pp. 69-73). IEEE.
-    .. [3] Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer
-        volutpat feugiat imperdiet. Phasellus placerat elit nec erat tristique
-        faucibus. Suspendisse at nunc odio. Nullam sagittis nunc ut sed.
-
+    
     Examples
     --------
     Let us consider the problem of minimizing the Rosenbrock function,
@@ -760,7 +713,7 @@ def minimize_qpso(fun, x0, args=(), constraints=(), tol=None, callback=None,
     Initialize 1000 particles and run the minimization function:
 
     >>> x0 = np.random.uniform(0, 2, (1000, 5))
-    >>> res = minimize_pso(rosen, x0, options={'stable_iter': 50})
+    >>> res = minimize_qpso(rosen, x0, options={'stable_iter': 50, levy_rate = 0.1, decay_rate = 0.1})
     >>> res.x
     array([1.00000003, 1.00000017, 1.00000034, 1.0000006 , 1.00000135])
 
@@ -787,8 +740,8 @@ def minimize_qpso(fun, x0, args=(), constraints=(), tol=None, callback=None,
 
     Running the constrained version of the function:
 
-    >>> res = minimize_pso(fun, x0, constrainsts=cons, options={
-    ...     'g_rate': 1., 'l_rate': 1., 'max_velocity': 4., 'stable_iter': 50})
+    >>> res = minimize_qpso(fun, x0, constrainsts=cons, options={
+    ...     'g_rate': 1., 'l_rate': 1., 'max_velocity': 4., 'stable_iter': 50, levy_rate = 0.1, decay_rate = 0.1})
     >>> res.x
     array([ 1.39985398,  1.69992748])
 

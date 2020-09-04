@@ -266,6 +266,7 @@ def lorenz(x, y, z):
     return x_dot, y_dot, z_dot
 
 def init_lorenz_chaos(shape, low=0., high=1.):
+    #lorenz chaos function with limits
     chaos_limits = { "x_high" : 22.0 , "x_low" : -22.0 , "y_high" : 30.0 , "y_low" : -30.0 , "z_high" : 55.0 , "z_low" : 0.0 }
     lorenz_sets = shape[1]//3 + 1
     chaos_set = {}
